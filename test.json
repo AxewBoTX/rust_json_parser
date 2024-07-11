@@ -1,0 +1,23 @@
+{
+  "name": "John Doe",
+  "username": "john_doe_1",
+  "worker_list": ["worker1", "worker2", "worker3"],
+  "tasks": [
+    {
+      "heading": "do some task",
+      "done": false
+    },
+    {
+      "heading": "do some task1",
+      "done": true
+    },
+    {
+      "heading": "do some task2",
+      "done": false
+    },
+    {
+      "heading": "do some task2",
+      "done": true
+    }
+  ]
+}

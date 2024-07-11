@@ -1,2 +1,3 @@
-# rust_json_parser
-json parser in rust
+# rust-json-parser
+
+json parser written in rust
