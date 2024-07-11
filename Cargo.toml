@@ -1,6 +1,9 @@
+workspace = {members = ["json_parser"]}
+
 [package]
-name = "json_parser"
+name = "rust_json_parser"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+json_parser = {path = "json_parser"}

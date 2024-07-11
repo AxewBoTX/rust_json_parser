@@ -1,0 +1,10 @@
+name: rust-json-parser
+
+services:
+  rust-json-parser:
+    container_name: rust-json-parser
+    build:
+      context: .
+      dockerfile: dev.dockerfile
+    volumes:
+      - .:/usr/src/app
