@@ -1,5 +1,7 @@
-use std::collections::HashMap;
+use crate::token;
+use std::{collections::HashMap, iter::Peekable, slice::Iter};
 
+#[derive(Debug)]
 pub enum Node {
     Object(HashMap<String, Node>),
     Array(Vec<Node>),
@@ -10,7 +12,9 @@ pub enum Node {
     Null,
 }
 
-pub fn parse_object() {}
-pub fn parse_array() {}
-pub fn parse_string() {}
-pub fn parse_number() {}
+pub fn parse_object(tokens: &mut Peekable<Iter<token::Token>>) {
+    todo!("{:#?}", tokens);
+}
+pub fn parse_array(tokens: &mut Peekable<Iter<token::Token>>) {
+    todo!("{:#?}", tokens);
+}

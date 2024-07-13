@@ -101,10 +101,42 @@ impl JsonParser {
         }
         return tokens;
     }
-    pub fn parse(tokens: Vec<token::Token>) -> Result<node::Node, String> {
-        let main_cursor_pos: Box<usize> = Box::new(0);
-        match tokens[*main_cursor_pos] {
-            _ => Err(format!("unexpected token: {:#?}", tokens[*main_cursor_pos])),
+    pub fn parse(&self, tokens: Vec<token::Token>) -> Result<node::Node, String> {
+        let mut value = node::Node::Null;
+
+        let mut tokens = tokens.iter().peekable();
+        while let Some(token) = tokens.next() {
+            match token.kind {
+                token::TokenKind::CurlyBraceOpen => {
+                    node::parse_object(&mut tokens);
+                    println!("It starts an object");
+                }
+                token::TokenKind::BracketOpen => {
+                    node::parse_array(&mut tokens);
+                    println!("It starts an object");
+                }
+                token::TokenKind::String => {
+                    value = node::Node::String(token.value.clone());
+                }
+                token::TokenKind::Number => {
+                    value = node::Node::Number(token.value.parse::<f64>().unwrap());
+                }
+                token::TokenKind::True => {
+                    value = node::Node::True;
+                }
+                token::TokenKind::False => {
+                    value = node::Node::False;
+                }
+                token::TokenKind::Null => {
+                    value = node::Node::Null;
+                }
+                // no need to handle them here
+                token::TokenKind::CurlyBraceClose => {}
+                token::TokenKind::BracketClose => {}
+                token::TokenKind::Comma => {}
+                token::TokenKind::Colon => {}
+            }
         }
+        return Ok(value);
     }
 }
