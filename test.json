@@ -1,23 +1,26 @@
 {
-  "name": "John Doe",
-  "username": "john_doe_1",
-  "worker_list": ["worker1", "worker2", "worker3"],
-  "tasks": [
+  "pairs": [
     {
-      "heading": "do some task",
-      "done": false
+      "x0": 95.26235434764715,
+      "y0": -33.78221816487377,
+      "x1": 41.844453001935875,
+      "y1": -78.10213222087448
     },
     {
-      "heading": "do some task1",
-      "done": true
+      "x0": 115.42029308864215,
+      "y0": 1.20021873e-5,
+      "x1": 83.39640643072113,
+      "y1": 28.643090267505812
     },
     {
-      "heading": "do some task2",
-      "done": false
-    },
-    {
-      "heading": "do some task2",
-      "done": true
+      "sample": "string sample",
+      "nullable": null,
+      "isWorking": true,
+      "isNotWorking": false
     }
-  ]
+  ],
+  "utf8": {
+    "key1": "ࠄࠀࠆࠄࠀࠁࠃ",
+    "key2": "value2"
+  }
 }

@@ -59,6 +59,7 @@ impl JsonParser {
                     tokens.push(token::Token::new(token::TokenKind::String, value));
                     main_cursor_pos = *string_cursor_pos + 1;
                 }
+                // ------ there is some problem here ------
                 _ => {
                     if input[main_cursor_pos].is_alphanumeric() {
                         let mut value = String::new();
@@ -93,7 +94,7 @@ impl JsonParser {
                             ));
                         }
 
-                        main_cursor_pos = *alpha_cursor_pos + 1;
+                        main_cursor_pos = *alpha_cursor_pos - 1;
                     }
                 }
             }
@@ -101,19 +102,18 @@ impl JsonParser {
         }
         return tokens;
     }
-    pub fn parse(&self, tokens: Vec<token::Token>) -> Result<node::Node, String> {
+
+    pub fn parse(&self, tokens: Vec<token::Token>) -> node::Node {
         let mut value = node::Node::Null;
 
-        let mut tokens = tokens.iter().peekable();
+        let mut tokens = tokens.iter();
         while let Some(token) = tokens.next() {
             match token.kind {
                 token::TokenKind::CurlyBraceOpen => {
-                    node::parse_object(&mut tokens);
-                    println!("It starts an object");
+                    value = node::Node::Object(node::parse_object(&mut tokens));
                 }
                 token::TokenKind::BracketOpen => {
-                    node::parse_array(&mut tokens);
-                    println!("It starts an object");
+                    value = node::Node::Array(node::parse_array(&mut tokens));
                 }
                 token::TokenKind::String => {
                     value = node::Node::String(token.value.clone());
@@ -131,12 +131,12 @@ impl JsonParser {
                     value = node::Node::Null;
                 }
                 // no need to handle them here
-                token::TokenKind::CurlyBraceClose => {}
-                token::TokenKind::BracketClose => {}
-                token::TokenKind::Comma => {}
-                token::TokenKind::Colon => {}
+                token::TokenKind::CurlyBraceClose
+                | token::TokenKind::BracketClose
+                | token::TokenKind::Comma
+                | token::TokenKind::Colon => {}
             }
         }
-        return Ok(value);
+        return value;
     }
 }
