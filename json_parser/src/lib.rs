@@ -12,93 +12,98 @@ impl JsonParser {
     pub fn tokenize(&self, input: String) -> Vec<token::Token> {
         let mut tokens: Vec<token::Token> = vec![];
 
-        let input = input.chars().collect::<Vec<char>>();
-        let mut main_cursor_pos = 0;
+        let mut input = input.chars().peekable();
 
-        while main_cursor_pos < input.len() {
-            match input[main_cursor_pos] {
+        while let Some(character) = input.peek() {
+            match character {
                 '{' => {
                     tokens.push(token::Token::new(
                         token::TokenKind::CurlyBraceOpen,
                         "{".to_string(),
                     ));
+                    let _ = input.next();
                 }
                 '}' => {
                     tokens.push(token::Token::new(
                         token::TokenKind::CurlyBraceClose,
                         "}".to_string(),
                     ));
+                    let _ = input.next();
                 }
                 '[' => {
                     tokens.push(token::Token::new(
                         token::TokenKind::BracketOpen,
                         "[".to_string(),
                     ));
+                    let _ = input.next();
                 }
                 ']' => {
                     tokens.push(token::Token::new(
                         token::TokenKind::BracketClose,
                         "]".to_string(),
                     ));
+                    let _ = input.next();
                 }
                 ',' => {
                     tokens.push(token::Token::new(token::TokenKind::Comma, ",".to_string()));
+                    let _ = input.next();
                 }
                 ':' => {
                     tokens.push(token::Token::new(token::TokenKind::Colon, ":".to_string()));
+                    let _ = input.next();
                 }
                 '"' => {
-                    let mut string_cursor_pos: Box<usize> = Box::new(main_cursor_pos);
-                    let mut value = String::new();
-                    while input[*string_cursor_pos + 1] != '"' {
-                        if !input[*string_cursor_pos + 1].is_whitespace() {
-                            value.push_str(input[*string_cursor_pos + 1].to_string().as_str());
-                        }
-                        *string_cursor_pos += 1;
-                    }
-                    tokens.push(token::Token::new(token::TokenKind::String, value));
-                    main_cursor_pos = *string_cursor_pos + 1;
+                    let _ = input.next();
+                    tokens.push(token::Token::tokenize_string(&mut input));
                 }
-                // ------ there is some problem here ------
-                _ => {
-                    if input[main_cursor_pos].is_alphanumeric() {
-                        let mut value = String::new();
-                        let mut alpha_cursor_pos: Box<usize> = Box::new(main_cursor_pos);
-                        while input[*alpha_cursor_pos].is_alphanumeric() {
-                            value.push_str(input[*alpha_cursor_pos].to_string().as_str());
-                            *alpha_cursor_pos += 1;
-                        }
+                '-' | '0'..='9' => {
+                    tokens.push(token::Token::tokenize_number(&mut input));
+                }
+                't' => {
+                    let _ = input.next();
+                    assert_eq!(Some('r'), input.next());
+                    assert_eq!(Some('u'), input.next());
+                    assert_eq!(Some('e'), input.next());
 
-                        if utils::is_number(value.as_str()) {
-                            tokens.push(token::Token::new(
-                                token::TokenKind::Number,
-                                value.as_str().to_string(),
-                            ));
-                        }
-                        if utils::is_bool_true(value.as_str()) {
-                            tokens.push(token::Token::new(
-                                token::TokenKind::True,
-                                value.as_str().to_string(),
-                            ));
-                        }
-                        if utils::is_bool_false(value.as_str()) {
-                            tokens.push(token::Token::new(
-                                token::TokenKind::False,
-                                value.as_str().to_string(),
-                            ));
-                        }
-                        if utils::is_null(value.as_str()) {
-                            tokens.push(token::Token::new(
-                                token::TokenKind::Null,
-                                value.as_str().to_string(),
-                            ));
-                        }
+                    tokens.push(token::Token::new(
+                        token::TokenKind::True,
+                        "true".to_string(),
+                    ));
+                }
+                'f' => {
+                    let _ = input.next();
+                    assert_eq!(Some('a'), input.next());
+                    assert_eq!(Some('l'), input.next());
+                    assert_eq!(Some('s'), input.next());
+                    assert_eq!(Some('e'), input.next());
 
-                        main_cursor_pos = *alpha_cursor_pos - 1;
+                    tokens.push(token::Token::new(
+                        token::TokenKind::False,
+                        "false".to_string(),
+                    ));
+                }
+                'n' => {
+                    let _ = input.next();
+                    assert_eq!(Some('u'), input.next());
+                    assert_eq!(Some('l'), input.next());
+                    assert_eq!(Some('l'), input.next());
+
+                    tokens.push(token::Token::new(
+                        token::TokenKind::Null,
+                        "null".to_string(),
+                    ));
+                }
+                '\0' => {
+                    break;
+                }
+                other => {
+                    if !other.is_whitespace() {
+                        panic!("Unexpected token: {:#?}", other);
+                    } else {
+                        input.next();
                     }
                 }
             }
-            main_cursor_pos += 1;
         }
         return tokens;
     }
