@@ -9,7 +9,6 @@ fn main() {
         Ok(filepath) => match fs::read_to_string(&filepath) {
             Ok(contents) => {
                 let tokens = json.tokenize(contents);
-                // println!("Tokens: {:#?}", tokens);
                 println!("Parsed JSON: {:#?}", json.parse(tokens));
             }
             Err(e) => {
@@ -20,10 +19,4 @@ fn main() {
             eprintln!("{}", e.to_string())
         }
     };
-}
-
-#[cfg(test)]
-mod test {
-    #[test]
-    pub fn test_stuff() {}
 }

@@ -21,46 +21,46 @@ impl JsonParser {
                         token::TokenKind::CurlyBraceOpen,
                         "{".to_string(),
                     ));
-                    let _ = input.next();
+                    input.next();
                 }
                 '}' => {
                     tokens.push(token::Token::new(
                         token::TokenKind::CurlyBraceClose,
                         "}".to_string(),
                     ));
-                    let _ = input.next();
+                    input.next();
                 }
                 '[' => {
                     tokens.push(token::Token::new(
                         token::TokenKind::BracketOpen,
                         "[".to_string(),
                     ));
-                    let _ = input.next();
+                    input.next();
                 }
                 ']' => {
                     tokens.push(token::Token::new(
                         token::TokenKind::BracketClose,
                         "]".to_string(),
                     ));
-                    let _ = input.next();
+                    input.next();
                 }
                 ',' => {
                     tokens.push(token::Token::new(token::TokenKind::Comma, ",".to_string()));
-                    let _ = input.next();
+                    input.next();
                 }
                 ':' => {
                     tokens.push(token::Token::new(token::TokenKind::Colon, ":".to_string()));
-                    let _ = input.next();
+                    input.next();
                 }
                 '"' => {
-                    let _ = input.next();
+                    input.next();
                     tokens.push(token::Token::tokenize_string(&mut input));
                 }
                 '-' | '0'..='9' => {
                     tokens.push(token::Token::tokenize_number(&mut input));
                 }
                 't' => {
-                    let _ = input.next();
+                    input.next();
                     assert_eq!(Some('r'), input.next());
                     assert_eq!(Some('u'), input.next());
                     assert_eq!(Some('e'), input.next());
@@ -71,7 +71,7 @@ impl JsonParser {
                     ));
                 }
                 'f' => {
-                    let _ = input.next();
+                    input.next();
                     assert_eq!(Some('a'), input.next());
                     assert_eq!(Some('l'), input.next());
                     assert_eq!(Some('s'), input.next());
@@ -83,7 +83,7 @@ impl JsonParser {
                     ));
                 }
                 'n' => {
-                    let _ = input.next();
+                    input.next();
                     assert_eq!(Some('u'), input.next());
                     assert_eq!(Some('l'), input.next());
                     assert_eq!(Some('l'), input.next());

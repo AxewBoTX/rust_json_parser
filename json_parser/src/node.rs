@@ -1,4 +1,3 @@
-use crate::node;
 use crate::token;
 use std::{collections::HashMap, slice::Iter};
 
@@ -22,7 +21,7 @@ pub fn parse_object(tokens: &mut Iter<token::Token>) -> HashMap<String, Node> {
         match curr_token.kind {
             token::TokenKind::CurlyBraceOpen => {
                 if let Some(key) = current_key {
-                    object.insert(key.to_string(), node::Node::Object(parse_object(tokens)));
+                    object.insert(key.to_string(), Node::Object(parse_object(tokens)));
                 }
             }
             token::TokenKind::Colon => {
@@ -30,7 +29,7 @@ pub fn parse_object(tokens: &mut Iter<token::Token>) -> HashMap<String, Node> {
             }
             token::TokenKind::BracketOpen => {
                 if let Some(key) = current_key {
-                    object.insert(key.to_string(), node::Node::Array(parse_array(tokens)));
+                    object.insert(key.to_string(), Node::Array(parse_array(tokens)));
                     current_key = None;
                 }
             }
@@ -38,10 +37,7 @@ pub fn parse_object(tokens: &mut Iter<token::Token>) -> HashMap<String, Node> {
                 if is_key == true {
                     current_key = Some(curr_token.value.as_str());
                 } else if let Some(key) = current_key {
-                    object.insert(
-                        key.to_string(),
-                        node::Node::String(curr_token.value.clone()),
-                    );
+                    object.insert(key.to_string(), Node::String(curr_token.value.clone()));
                     current_key = None;
                 }
             }
@@ -49,26 +45,26 @@ pub fn parse_object(tokens: &mut Iter<token::Token>) -> HashMap<String, Node> {
                 if let Some(key) = current_key {
                     object.insert(
                         key.to_string(),
-                        node::Node::Number(curr_token.value.clone().parse::<f64>().unwrap()),
+                        Node::Number(curr_token.value.clone().parse::<f64>().unwrap()),
                     );
                     current_key = None;
                 }
             }
             token::TokenKind::True => {
                 if let Some(key) = current_key {
-                    object.insert(key.to_string(), node::Node::True);
+                    object.insert(key.to_string(), Node::True);
                     current_key = None;
                 }
             }
             token::TokenKind::False => {
                 if let Some(key) = current_key {
-                    object.insert(key.to_string(), node::Node::False);
+                    object.insert(key.to_string(), Node::False);
                     current_key = None;
                 }
             }
             token::TokenKind::Null => {
                 if let Some(key) = current_key {
-                    object.insert(key.to_string(), node::Node::Null);
+                    object.insert(key.to_string(), Node::Null);
                     current_key = None;
                 }
             }
@@ -89,27 +85,27 @@ pub fn parse_array(tokens: &mut Iter<token::Token>) -> Vec<Node> {
     while let Some(curr_token) = tokens.next() {
         match curr_token.kind {
             token::TokenKind::CurlyBraceOpen => {
-                array.push(node::Node::Object(parse_object(tokens)));
+                array.push(Node::Object(parse_object(tokens)));
             }
             token::TokenKind::BracketOpen => {
-                array.push(node::Node::Array(parse_array(tokens)));
+                array.push(Node::Array(parse_array(tokens)));
             }
             token::TokenKind::String => {
-                array.push(node::Node::String(curr_token.value.clone()));
+                array.push(Node::String(curr_token.value.clone()));
             }
             token::TokenKind::Number => {
-                array.push(node::Node::Number(
+                array.push(Node::Number(
                     curr_token.value.clone().parse::<f64>().unwrap(),
                 ));
             }
             token::TokenKind::True => {
-                array.push(node::Node::True);
+                array.push(Node::True);
             }
             token::TokenKind::False => {
-                array.push(node::Node::False);
+                array.push(Node::False);
             }
             token::TokenKind::Null => {
-                array.push(node::Node::Null);
+                array.push(Node::Null);
             }
             token::TokenKind::BracketClose => {
                 break;

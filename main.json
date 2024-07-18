@@ -1,7 +1,7 @@
 {
   "id": "647ceaf3657eade56f8224eb",
-  "index": 3,
-  "something": [1, 2, 3, 4],
+  "index": 0,
+  "something": [1.2, 2.1238, 3.817239817, 4.07012701337],
   "nullValue": null,
   "boolean": true
 }

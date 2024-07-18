@@ -37,13 +37,52 @@ impl Token {
     }
     pub fn tokenize_number(input: &mut Peekable<Chars<'_>>) -> Token {
         let mut value = Vec::<char>::new();
-        while input.peek().is_some_and(|peek_char| peek_char.is_numeric()) {
-            if let Some(curr_char) = input.peek() {
-                value.push(*curr_char);
+        let mut is_decimal = false;
+        while let Some(character) = input.peek() {
+            match character {
+                '-' => {
+                    value.push('-');
+                    input.next();
+                }
+                '+' => {
+                    input.next();
+                }
+                digit @ '0'..='9' => {
+                    value.push(*digit);
+                    input.next();
+                }
+                '.' => {
+                    if is_decimal == false {
+                        value.push('.');
+                        is_decimal = true;
+                    } else {
+                        println!("Using '.' two times in a single number is not allowed!");
+                    }
+                    input.next();
+                }
+                '}' | ',' | ']' | ':' => {
+                    break;
+                }
+                other => {
+                    if !other.is_ascii_whitespace() {
+                        panic!("Unexpected character while parsing number: {character}");
+                    } else {
+                        input.next();
+                    }
+                }
             }
-            let _ = input.next();
         }
 
-        return Token::new(TokenKind::Number, String::from_iter(value));
+        if is_decimal {
+            return Token::new(
+                TokenKind::Number,
+                String::from_iter(value).parse::<f64>().unwrap().to_string(),
+            );
+        } else {
+            return Token::new(
+                TokenKind::Number,
+                String::from_iter(value).parse::<i64>().unwrap().to_string(),
+            );
+        }
     }
 }
