@@ -7,10 +7,14 @@ fn main() {
     let json = json_parser::JsonParser::new();
     match fs::canonicalize(&PathBuf::from(&args[1])) {
         Ok(filepath) => match fs::read_to_string(&filepath) {
-            Ok(contents) => {
-                let tokens = json.tokenize(contents);
-                println!("Parsed JSON: {:#?}", json.parse(tokens));
-            }
+            Ok(contents) => match json.parse(contents) {
+                Ok(safe_value) => {
+                    println!("{:#?}", safe_value);
+                }
+                Err(e) => {
+                    eprintln!("Failed to parse json, Error: {:#?}", e.to_string());
+                }
+            },
             Err(e) => {
                 eprintln!("{}", e.to_string());
             }

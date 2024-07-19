@@ -9,7 +9,7 @@ impl JsonParser {
     pub fn new() -> JsonParser {
         return JsonParser {};
     }
-    pub fn tokenize(&self, input: String) -> Vec<token::Token> {
+    pub fn tokenize(&self, input: String) -> Result<Vec<token::Token>, String> {
         let mut tokens: Vec<token::Token> = vec![];
 
         let mut input = input.chars().peekable();
@@ -56,9 +56,14 @@ impl JsonParser {
                     input.next();
                     tokens.push(token::Token::tokenize_string(&mut input));
                 }
-                '-' | '0'..='9' => {
-                    tokens.push(token::Token::tokenize_number(&mut input));
-                }
+                '-' | '0'..='9' => match token::Token::tokenize_number(&mut input) {
+                    Ok(safe_value) => {
+                        tokens.push(safe_value);
+                    }
+                    Err(e) => {
+                        return Err(e.to_string());
+                    }
+                },
                 't' => {
                     input.next();
                     assert_eq!(Some('r'), input.next());
@@ -105,27 +110,48 @@ impl JsonParser {
                 }
             }
         }
-        return tokens;
+        return Ok(tokens);
     }
 
-    pub fn parse(&self, tokens: Vec<token::Token>) -> node::Node {
+    pub fn parse(&self, input: String) -> Result<node::Node, String> {
+        let tokens = match self.tokenize(input) {
+            Ok(safe_value) => safe_value,
+            Err(e) => {
+                return Err(e.to_string());
+            }
+        };
         let mut value = node::Node::Null;
 
         let mut tokens = tokens.iter();
         while let Some(token) = tokens.next() {
             match token.kind {
                 token::TokenKind::CurlyBraceOpen => {
-                    value = node::Node::Object(node::parse_object(&mut tokens));
+                    value = node::Node::Object(match node::parse_object(&mut tokens) {
+                        Ok(safe_value) => safe_value,
+                        Err(e) => {
+                            return Err(e.to_string());
+                        }
+                    });
                 }
                 token::TokenKind::BracketOpen => {
-                    value = node::Node::Array(node::parse_array(&mut tokens));
+                    value = node::Node::Array(match node::parse_array(&mut tokens) {
+                        Ok(safe_value) => safe_value,
+                        Err(e) => {
+                            return Err(e.to_string());
+                        }
+                    });
                 }
                 token::TokenKind::String => {
                     value = node::Node::String(token.value.clone());
                 }
-                token::TokenKind::Number => {
-                    value = node::Node::Number(token.value.parse::<f64>().unwrap());
-                }
+                token::TokenKind::Number => match token.value.parse::<f64>() {
+                    Ok(safe_value) => {
+                        value = node::Node::Number(safe_value);
+                    }
+                    Err(e) => {
+                        return Err(e.to_string());
+                    }
+                },
                 token::TokenKind::True => {
                     value = node::Node::True;
                 }
@@ -142,6 +168,6 @@ impl JsonParser {
                 | token::TokenKind::Colon => {}
             }
         }
-        return value;
+        return Ok(value);
     }
 }

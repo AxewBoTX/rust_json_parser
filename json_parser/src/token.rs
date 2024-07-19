@@ -35,7 +35,7 @@ impl Token {
         }
         return Token::new(TokenKind::String, String::from_iter(value));
     }
-    pub fn tokenize_number(input: &mut Peekable<Chars<'_>>) -> Token {
+    pub fn tokenize_number(input: &mut Peekable<Chars<'_>>) -> Result<Token, String> {
         let mut value = Vec::<char>::new();
         let mut is_decimal = false;
         while let Some(character) = input.peek() {
@@ -56,7 +56,11 @@ impl Token {
                         value.push('.');
                         is_decimal = true;
                     } else {
-                        println!("Using '.' two times in a single number is not allowed!");
+                        eprintln!(
+                            "Error: {:#?}",
+                            "Using '.' two times in a single number is not allowed!"
+                        );
+                        std::process::exit(1); // exit the program on any occurance of this error
                     }
                     input.next();
                 }
@@ -74,15 +78,23 @@ impl Token {
         }
 
         if is_decimal {
-            return Token::new(
-                TokenKind::Number,
-                String::from_iter(value).parse::<f64>().unwrap().to_string(),
-            );
+            match String::from_iter(value).parse::<f64>() {
+                Ok(safe_value) => {
+                    return Ok(Token::new(TokenKind::Number, safe_value.to_string()));
+                }
+                Err(e) => {
+                    return Err(e.to_string());
+                }
+            }
         } else {
-            return Token::new(
-                TokenKind::Number,
-                String::from_iter(value).parse::<i64>().unwrap().to_string(),
-            );
+            match String::from_iter(value).parse::<i64>() {
+                Ok(safe_value) => {
+                    return Ok(Token::new(TokenKind::Number, safe_value.to_string()));
+                }
+                Err(e) => {
+                    return Err(e.to_string());
+                }
+            }
         }
     }
 }

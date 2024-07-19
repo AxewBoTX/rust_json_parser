@@ -12,7 +12,7 @@ pub enum Node {
     Null,
 }
 
-pub fn parse_object(tokens: &mut Iter<token::Token>) -> HashMap<String, Node> {
+pub fn parse_object(tokens: &mut Iter<token::Token>) -> Result<HashMap<String, Node>, String> {
     let mut object = HashMap::new();
     let mut is_key = true;
     let mut current_key: Option<&str> = None;
@@ -21,7 +21,14 @@ pub fn parse_object(tokens: &mut Iter<token::Token>) -> HashMap<String, Node> {
         match curr_token.kind {
             token::TokenKind::CurlyBraceOpen => {
                 if let Some(key) = current_key {
-                    object.insert(key.to_string(), Node::Object(parse_object(tokens)));
+                    match parse_object(tokens) {
+                        Ok(safe_value) => {
+                            object.insert(key.to_string(), Node::Object(safe_value));
+                        }
+                        Err(e) => {
+                            return Err(e.to_string());
+                        }
+                    }
                 }
             }
             token::TokenKind::Colon => {
@@ -29,7 +36,14 @@ pub fn parse_object(tokens: &mut Iter<token::Token>) -> HashMap<String, Node> {
             }
             token::TokenKind::BracketOpen => {
                 if let Some(key) = current_key {
-                    object.insert(key.to_string(), Node::Array(parse_array(tokens)));
+                    match parse_array(tokens) {
+                        Ok(safe_value) => {
+                            object.insert(key.to_string(), Node::Array(safe_value));
+                        }
+                        Err(e) => {
+                            return Err(e.to_string());
+                        }
+                    }
                     current_key = None;
                 }
             }
@@ -45,7 +59,12 @@ pub fn parse_object(tokens: &mut Iter<token::Token>) -> HashMap<String, Node> {
                 if let Some(key) = current_key {
                     object.insert(
                         key.to_string(),
-                        Node::Number(curr_token.value.clone().parse::<f64>().unwrap()),
+                        Node::Number(match curr_token.value.clone().parse::<f64>() {
+                            Ok(safe_value) => safe_value,
+                            Err(e) => {
+                                return Err(e.to_string());
+                            }
+                        }),
                     );
                     current_key = None;
                 }
@@ -78,26 +97,39 @@ pub fn parse_object(tokens: &mut Iter<token::Token>) -> HashMap<String, Node> {
             token::TokenKind::BracketClose => {}
         }
     }
-    return object;
+    return Ok(object);
 }
-pub fn parse_array(tokens: &mut Iter<token::Token>) -> Vec<Node> {
+pub fn parse_array(tokens: &mut Iter<token::Token>) -> Result<Vec<Node>, String> {
     let mut array: Vec<Node> = Vec::<Node>::new();
     while let Some(curr_token) = tokens.next() {
         match curr_token.kind {
-            token::TokenKind::CurlyBraceOpen => {
-                array.push(Node::Object(parse_object(tokens)));
-            }
-            token::TokenKind::BracketOpen => {
-                array.push(Node::Array(parse_array(tokens)));
-            }
+            token::TokenKind::CurlyBraceOpen => match parse_object(tokens) {
+                Ok(safe_value) => {
+                    array.push(Node::Object(safe_value));
+                }
+                Err(e) => {
+                    return Err(e.to_string());
+                }
+            },
+            token::TokenKind::BracketOpen => match parse_array(tokens) {
+                Ok(safe_value) => {
+                    array.push(Node::Array(safe_value));
+                }
+                Err(e) => {
+                    return Err(e.to_string());
+                }
+            },
             token::TokenKind::String => {
                 array.push(Node::String(curr_token.value.clone()));
             }
-            token::TokenKind::Number => {
-                array.push(Node::Number(
-                    curr_token.value.clone().parse::<f64>().unwrap(),
-                ));
-            }
+            token::TokenKind::Number => match curr_token.value.clone().parse::<f64>() {
+                Ok(safe_value) => {
+                    array.push(Node::Number(safe_value));
+                }
+                Err(e) => {
+                    return Err(e.to_string());
+                }
+            },
             token::TokenKind::True => {
                 array.push(Node::True);
             }
@@ -115,5 +147,5 @@ pub fn parse_array(tokens: &mut Iter<token::Token>) -> Vec<Node> {
             | token::TokenKind::Colon => {}
         }
     }
-    return array;
+    return Ok(array);
 }
