@@ -25,6 +25,31 @@ impl Token {
     pub fn new(kind: TokenKind, value: String) -> Token {
         return Token { kind, value };
     }
+    pub fn tokenize_true(input: &mut Peekable<Chars<'_>>) -> Token {
+        input.next();
+        assert_eq!(Some('r'), input.next());
+        assert_eq!(Some('u'), input.next());
+        assert_eq!(Some('e'), input.next());
+
+        return Token::new(TokenKind::True, "true".to_string());
+    }
+    pub fn tokenize_false(input: &mut Peekable<Chars<'_>>) -> Token {
+        input.next();
+        assert_eq!(Some('a'), input.next());
+        assert_eq!(Some('l'), input.next());
+        assert_eq!(Some('s'), input.next());
+        assert_eq!(Some('e'), input.next());
+
+        return Token::new(TokenKind::False, "false".to_string());
+    }
+    pub fn tokenize_null(input: &mut Peekable<Chars<'_>>) -> Token {
+        input.next();
+        assert_eq!(Some('u'), input.next());
+        assert_eq!(Some('l'), input.next());
+        assert_eq!(Some('l'), input.next());
+
+        return Token::new(TokenKind::Null, "null".to_string());
+    }
     pub fn tokenize_string(input: &mut Peekable<Chars<'_>>) -> Token {
         let mut value = Vec::<char>::new();
         while let Some(character) = input.next() {

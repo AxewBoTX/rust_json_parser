@@ -1,6 +1,5 @@
 pub mod node;
 pub mod token;
-pub mod utils;
 
 #[derive(Debug)]
 pub struct JsonParser {}
@@ -65,38 +64,13 @@ impl JsonParser {
                     }
                 },
                 't' => {
-                    input.next();
-                    assert_eq!(Some('r'), input.next());
-                    assert_eq!(Some('u'), input.next());
-                    assert_eq!(Some('e'), input.next());
-
-                    tokens.push(token::Token::new(
-                        token::TokenKind::True,
-                        "true".to_string(),
-                    ));
+                    tokens.push(token::Token::tokenize_true(&mut input));
                 }
                 'f' => {
-                    input.next();
-                    assert_eq!(Some('a'), input.next());
-                    assert_eq!(Some('l'), input.next());
-                    assert_eq!(Some('s'), input.next());
-                    assert_eq!(Some('e'), input.next());
-
-                    tokens.push(token::Token::new(
-                        token::TokenKind::False,
-                        "false".to_string(),
-                    ));
+                    tokens.push(token::Token::tokenize_false(&mut input));
                 }
                 'n' => {
-                    input.next();
-                    assert_eq!(Some('u'), input.next());
-                    assert_eq!(Some('l'), input.next());
-                    assert_eq!(Some('l'), input.next());
-
-                    tokens.push(token::Token::new(
-                        token::TokenKind::Null,
-                        "null".to_string(),
-                    ));
+                    tokens.push(token::Token::tokenize_null(&mut input));
                 }
                 '\0' => {
                     break;
@@ -120,9 +94,10 @@ impl JsonParser {
                 return Err(e.to_string());
             }
         };
+        let mut tokens = tokens.iter();
+
         let mut value = node::Node::Null;
 
-        let mut tokens = tokens.iter();
         while let Some(token) = tokens.next() {
             match token.kind {
                 token::TokenKind::CurlyBraceOpen => {
