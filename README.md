@@ -1,3 +1,3 @@
-# rust-json-parser
+# parser-implementations
 
-json parser written in rust
+various custom parser implementations in various languages

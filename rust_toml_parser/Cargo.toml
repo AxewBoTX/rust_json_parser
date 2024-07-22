@@ -1,0 +1,9 @@
+workspace = {members = ["toml_parser"]}
+
+[package]
+name = "rust_toml_parser"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+toml_parser = {path = "toml_parser"}

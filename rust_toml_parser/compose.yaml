@@ -1,0 +1,10 @@
+name: rust-toml-parser
+
+services:
+  rust-toml-parser:
+    container_name: rust-toml-parser
+    build:
+      context: .
+      dockerfile: dev.dockerfile
+    volumes:
+      - .:/usr/src/app
