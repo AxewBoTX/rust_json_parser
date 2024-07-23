@@ -1,8 +1,8 @@
-name: rust-toml-parser
+name: parser-implementations
 
 services:
-  rust-toml-parser:
-    container_name: rust-toml-parser
+  parser-implementations:
+    container_name: parser-implementations
     build:
       context: .
       dockerfile: dev.dockerfile

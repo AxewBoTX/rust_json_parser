@@ -7,11 +7,11 @@ WORKDIR /usr/src/app
 COPY . .
 
 # basic container setup (according to my liking)
-RUN apt-get update && \
-	apt-get install -y curl && \
-	apt-get install -y tmux psmisc && \
-	bash -c "echo 'PATH="/usr/local/cargo/bin:$PATH"' >> ~/.bashrc" && \
-	bash -c "source ~/.bashrc"
+RUN apt-get update
+RUN apt-get install -y curl
+RUN apt-get install -y tmux psmisc
+RUN bash -c "echo 'PATH="/usr/local/cargo/bin:$PATH"' >> ~/.bashrc" && \
+RUN bash -c "source ~/.bashrc"
 
 # install needed dependencies
 RUN cargo install cargo-watch && \

@@ -1,6 +1,5 @@
-use std::{env, fs, path::PathBuf};
-
 use json_parser;
+use std::{env, fs, path::PathBuf};
 
 fn main() {
     let mut args = env::args();
