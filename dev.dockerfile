@@ -10,13 +10,8 @@ COPY . .
 RUN apt-get update
 RUN apt-get install -y curl
 RUN apt-get install -y tmux psmisc
-RUN bash -c "echo 'PATH="/usr/local/cargo/bin:$PATH"' >> ~/.bashrc" && \
+RUN bash -c "echo 'PATH="/usr/local/cargo/bin:$PATH"' >> ~/.bashrc"
 RUN bash -c "source ~/.bashrc"
-
-# install needed dependencies
-RUN cargo install cargo-watch && \
-	cargo check && \
-	cargo build
 
 # run the tail command to keep the container running
 CMD ["tail", "-f", "/dev/null"]
