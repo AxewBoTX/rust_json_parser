@@ -15,7 +15,7 @@ impl TomlParser {
         while let Some(character) = input.peek() {
             match character {
                 '#' => {
-                    while input.peek() != Some(&'\n') {
+                    while Some('\n') != input.peek().copied() {
                         input.next();
                     }
                 }
@@ -51,6 +51,10 @@ impl TomlParser {
                     tokens.push(token::Token::new(token::TokenKind::Comma, ",".to_string()));
                     input.next();
                 }
+                '.' => {
+                    tokens.push(token::Token::new(token::TokenKind::Dot, ".".to_string()));
+                    input.next();
+                }
                 '=' => {
                     tokens.push(token::Token::new(
                         token::TokenKind::EqualTo,
@@ -62,32 +66,25 @@ impl TomlParser {
                     input.next();
                     tokens.push(token::Token::tokenize_quote_string(&mut input));
                 }
-                // '-' | '0'..='9' => match token::Token::tokenize_number(&mut input) {
-                //     Ok(safe_value) => {
-                //         tokens.push(safe_value);
-                //     }
-                //     Err(e) => {
-                //         return Err(e.to_string());
-                //     }
-                // },
-                // 't' => {
-                //     // tokens.push(token::Token::tokenize_true(&mut input));
-                // }
-                // 'f' => {
-                //     // tokens.push(token::Token::tokenize_false(&mut input));
-                // }
+                '-' | '0'..='9' => match token::Token::tokenize_number(&mut input) {
+                    Ok(safe_value) => {
+                        tokens.push(safe_value);
+                    }
+                    Err(e) => {
+                        return Err(e.to_string());
+                    }
+                },
                 '\0' => {
                     break;
                 }
                 other => {
                     if other.is_whitespace() {
                         input.next();
+                    } else if other.is_alphanumeric() || ['_', '-'].contains(other) {
+                        tokens.push(token::Token::tokenize_nonquote_string(&mut input))
+                    } else {
+                        panic!("Unexpected token: {:#?}", other);
                     }
-                    // if other.is_alphabetic() {
-                    //     // tokens.push(token::Token::tokenize_nonquote_string(&mut input));
-                    // } else {
-                    //     // panic!("Unexpected token: {:#?}", other);
-                    // }
                 }
             }
         }

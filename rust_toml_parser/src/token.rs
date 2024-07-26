@@ -7,6 +7,7 @@ pub enum TokenKind {
     BracketOpen,
     BracketClose,
     EqualTo,
+    Dot,
     Comma,
     String,
     Number,
@@ -34,18 +35,43 @@ impl Token {
         }
         return Token::new(TokenKind::String, String::from_iter(value));
     }
-    pub fn tokenize_nonquote_string(_input: &mut Peekable<Chars<'_>>) -> Token {
-        let value = String::from("non-quote-string")
-            .chars()
-            .collect::<Vec<char>>();
-        // let value = Vec::<char>::new();
-        // while let Some(character) = input.next() {
-        //     if character == '"' {
-        //         break;
-        //     }
-        //     value.push(character);
-        // }
-        return Token::new(TokenKind::String, String::from_iter(value));
+    pub fn tokenize_nonquote_string(input: &mut Peekable<Chars<'_>>) -> Token {
+        let mut value = Vec::<char>::new();
+        if input.peek().is_some_and(|character| character.is_numeric()) {
+            input.next();
+        }
+        while let Some(character) = input.peek() {
+            if character.is_alphanumeric() {
+                value.push(*character);
+                input.next();
+            } else {
+                break;
+            }
+        }
+        if [String::from("true"), String::from("false")].contains(&String::from_iter(value.clone()))
+        {
+            while let Some(character) = input.peek() {
+                match character {
+                    '=' => {
+                        break;
+                    }
+                    '\n' => {
+                        if String::from_iter(value.clone()) == String::from("true") {
+                            return Token::new(TokenKind::True, String::from("true"));
+                        }
+                        if String::from_iter(value.clone()) == String::from("false") {
+                            return Token::new(TokenKind::False, String::from("false"));
+                        }
+                    }
+                    other => {
+                        if other.is_whitespace() {
+                            input.next();
+                        }
+                    }
+                }
+            }
+        }
+        return Token::new(TokenKind::String, String::from_iter(value.clone()));
     }
     pub fn tokenize_number(input: &mut Peekable<Chars<'_>>) -> Result<Token, String> {
         let mut value = Vec::<char>::new();
@@ -79,12 +105,14 @@ impl Token {
                 '}' | ',' | ']' | '=' => {
                     break;
                 }
+                '\n' => {
+                    break;
+                }
                 other => {
                     if !other.is_ascii_whitespace() {
-                        panic!("Unexpected character while parsing number: {character}");
-                    } else {
-                        input.next();
+                        eprintln!("Unexpected character while parsing number: {character}");
                     }
+                    input.next();
                 }
             }
         }
