@@ -9,7 +9,8 @@ pub enum TokenKind {
     EqualTo,
     Dot,
     Comma,
-    String,
+    QuoteString,
+    NonQuoteString,
 }
 
 #[derive(Debug)]
@@ -30,7 +31,7 @@ impl Token {
             }
             value.push(character);
         }
-        return Token::new(TokenKind::String, String::from_iter(value));
+        return Token::new(TokenKind::QuoteString, String::from_iter(value));
     }
     pub fn tokenize_nonquote_string(input: &mut Peekable<Chars<'_>>) -> Result<Token, String> {
         let mut value = Vec::<char>::new();
@@ -49,7 +50,7 @@ impl Token {
             }
         }
         return Ok(Token::new(
-            TokenKind::String,
+            TokenKind::NonQuoteString,
             String::from_iter(value.clone()),
         ));
     }

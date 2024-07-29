@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 pub mod node;
 pub mod token;
 
@@ -78,11 +80,11 @@ impl TomlParser {
                                 tokens.push(safe_value);
                             }
                             Err(e) => {
-                                panic!("{}", e.to_string());
+                                return Err(e.to_string());
                             }
                         }
                     } else {
-                        panic!("Unexpected character: {:#?}", other);
+                        return Err(format!("Unexpected character: {:#?}", other));
                     }
                 }
             }
@@ -93,8 +95,21 @@ impl TomlParser {
         match self.tokenize(input) {
             Ok(tokens) => {
                 let mut tokens = tokens.iter();
-                while let Some(_token) = tokens.next() {
-                    // println!("Tokens: {:#?}", token);
+                let mut _value = node::Node::Table(HashMap::new());
+                while let Some(curr_token) = tokens.next() {
+                    match curr_token.kind {
+                        token::TokenKind::BracketOpen => {}
+                        token::TokenKind::NonQuoteString => {}
+                        token::TokenKind::QuoteString => {}
+                        token::TokenKind::CurlyBracketOpen
+                        | token::TokenKind::CurlyBracketClose
+                        | token::TokenKind::BracketClose
+                        | token::TokenKind::EqualTo
+                        | token::TokenKind::Dot
+                        | token::TokenKind::Comma => {
+                            return Err(format!("unexpected token: {:#?}", curr_token.value));
+                        }
+                    }
                 }
                 return Err("".to_string());
             }

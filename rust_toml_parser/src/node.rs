@@ -4,8 +4,8 @@ use std::collections::HashMap;
 pub enum Node {
     Table(HashMap<String, Node>),
     Array(Vec<Node>),
-    Integer,
-    Float,
-    Boolean,
-    String,
+    Integer(i64),
+    Float(f64),
+    Boolean(bool),
+    String(String),
 }
