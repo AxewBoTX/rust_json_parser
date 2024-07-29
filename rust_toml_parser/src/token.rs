@@ -10,9 +10,6 @@ pub enum TokenKind {
     Dot,
     Comma,
     String,
-    Number,
-    True,
-    False,
 }
 
 #[derive(Debug)]
@@ -35,16 +32,25 @@ impl Token {
         }
         return Token::new(TokenKind::String, String::from_iter(value));
     }
-    pub fn tokenize_nonquote_string(input: &mut Peekable<Chars<'_>>) -> Token {
+    pub fn tokenize_nonquote_string(input: &mut Peekable<Chars<'_>>) -> Result<Token, String> {
         let mut value = Vec::<char>::new();
         while let Some(character) = input.peek() {
-            if character.is_alphanumeric() || ['-', '_'].contains(character) {
+            if character.is_alphanumeric() || ['-', '_', ':'].contains(character) {
                 value.push(*character);
                 input.next();
+            } else if [
+                '!', '@', '$', '%', '^', '&', '*', '(', ')', '{', '}', ';', '<', '>', '|',
+            ]
+            .contains(character)
+            {
+                return Err(format!("Unexpected character: {:#?}", character));
             } else {
                 break;
             }
         }
-        return Token::new(TokenKind::String, String::from_iter(value.clone()));
+        return Ok(Token::new(
+            TokenKind::String,
+            String::from_iter(value.clone()),
+        ));
     }
 }

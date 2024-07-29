@@ -73,9 +73,16 @@ impl TomlParser {
                     if other.is_whitespace() {
                         input.next();
                     } else if other.is_alphanumeric() || ['_', '-'].contains(other) {
-                        tokens.push(token::Token::tokenize_nonquote_string(&mut input))
+                        match token::Token::tokenize_nonquote_string(&mut input) {
+                            Ok(safe_value) => {
+                                tokens.push(safe_value);
+                            }
+                            Err(e) => {
+                                panic!("{}", e.to_string());
+                            }
+                        }
                     } else {
-                        panic!("Unexpected token: {:#?}", other);
+                        panic!("Unexpected character: {:#?}", other);
                     }
                 }
             }
@@ -83,8 +90,17 @@ impl TomlParser {
         return Ok(tokens);
     }
     pub fn parse(&self, input: String) -> Result<node::Node, String> {
-        let _tokens = self.tokenize(input);
-        let value: node::Node = node::Node::Null;
-        return Ok(value);
+        match self.tokenize(input) {
+            Ok(tokens) => {
+                let mut tokens = tokens.iter();
+                while let Some(_token) = tokens.next() {
+                    // println!("Tokens: {:#?}", token);
+                }
+                return Err("".to_string());
+            }
+            Err(e) => {
+                return Err(e.to_string());
+            }
+        }
     }
 }
