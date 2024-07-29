@@ -66,14 +66,6 @@ impl TomlParser {
                     input.next();
                     tokens.push(token::Token::tokenize_quote_string(&mut input));
                 }
-                '-' | '0'..='9' => match token::Token::tokenize_number(&mut input) {
-                    Ok(safe_value) => {
-                        tokens.push(safe_value);
-                    }
-                    Err(e) => {
-                        return Err(e.to_string());
-                    }
-                },
                 '\0' => {
                     break;
                 }
@@ -88,7 +80,6 @@ impl TomlParser {
                 }
             }
         }
-        println!("Tokens: {:#?}", tokens);
         return Ok(tokens);
     }
     pub fn parse(&self, input: String) -> Result<node::Node, String> {
