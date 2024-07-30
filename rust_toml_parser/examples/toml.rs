@@ -20,12 +20,17 @@ fn main() {
         Some(user_input) => {
             match fs::canonicalize(&PathBuf::from(&user_input)) {
                 Ok(filepath) => match fs::read_to_string(&filepath) {
-                    Ok(contents) => match toml.parse(contents) {
-                        Ok(safe_value) => {
-                            println!("{:#?}", safe_value);
-                        }
+                    Ok(contents) => match toml.tokenize(contents) {
+                        Ok(tokens) => match toml.parse(tokens) {
+                            Ok(safe_value) => {
+                                println!("{:#?}", safe_value);
+                            }
+                            Err(e) => {
+                                eprintln!("failed to parse toml, Error: {:#?}", e.to_string());
+                            }
+                        },
                         Err(e) => {
-                            eprintln!("failed to parse toml, Error: {:#?}", e.to_string());
+                            eprintln!("failed to tokenize toml, Error: {:#?}", e.to_string());
                         }
                     },
                     Err(e) => {

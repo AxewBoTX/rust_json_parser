@@ -11,6 +11,7 @@ pub enum TokenKind {
     Comma,
     QuoteString,
     NonQuoteString,
+    NewLine,
 }
 
 #[derive(Debug)]

@@ -1,4 +1,7 @@
-title = "hello"
+[main]
+name = "axewbotx"
+age = [1,2,3]
+power = {name = "some_stuf"}
 
-[user]
-name = "some_name"
+[main.super_power]
+name = "some_more_stuff"

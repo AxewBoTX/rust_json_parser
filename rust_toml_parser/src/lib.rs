@@ -1,7 +1,6 @@
-use std::collections::HashMap;
-
 pub mod node;
 pub mod token;
+pub mod utils;
 
 #[derive(Debug)]
 pub struct TomlParser {}
@@ -68,6 +67,13 @@ impl TomlParser {
                     input.next();
                     tokens.push(token::Token::tokenize_quote_string(&mut input));
                 }
+                '\n' => {
+                    tokens.push(token::Token::new(
+                        token::TokenKind::NewLine,
+                        "\n".to_string(),
+                    ));
+                    input.next();
+                }
                 '\0' => {
                     break;
                 }
@@ -91,27 +97,11 @@ impl TomlParser {
         }
         return Ok(tokens);
     }
-    pub fn parse(&self, input: String) -> Result<node::Node, String> {
-        match self.tokenize(input) {
-            Ok(tokens) => {
-                let mut tokens = tokens.iter();
-                let mut _value = node::Node::Table(HashMap::new());
-                while let Some(curr_token) = tokens.next() {
-                    match curr_token.kind {
-                        token::TokenKind::BracketOpen => {}
-                        token::TokenKind::NonQuoteString => {}
-                        token::TokenKind::QuoteString => {}
-                        token::TokenKind::CurlyBracketOpen
-                        | token::TokenKind::CurlyBracketClose
-                        | token::TokenKind::BracketClose
-                        | token::TokenKind::EqualTo
-                        | token::TokenKind::Dot
-                        | token::TokenKind::Comma => {
-                            return Err(format!("unexpected token: {:#?}", curr_token.value));
-                        }
-                    }
-                }
-                return Err("".to_string());
+    pub fn parse(&self, input: Vec<token::Token>) -> Result<node::Node, String> {
+        match utils::refine_tokens(input) {
+            Ok(safe_value) => {
+                let mut tokens = safe_value.iter().peekable();
+                return Ok(node::Node::Table(node::parse_table(&mut tokens)));
             }
             Err(e) => {
                 return Err(e.to_string());
