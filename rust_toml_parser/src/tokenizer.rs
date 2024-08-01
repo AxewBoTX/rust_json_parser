@@ -19,12 +19,20 @@ pub struct Token {
     pub kind: TokenKind,
     pub value: String,
 }
-
 impl Token {
     pub fn new(kind: TokenKind, value: String) -> Token {
         return Token { kind, value };
     }
-    pub fn tokenize_quote_string(input: &mut Peekable<Chars<'_>>) -> Token {
+}
+
+#[derive(Debug)]
+pub struct Tokenizer {}
+
+impl Tokenizer {
+    pub fn new() -> Tokenizer {
+        return Tokenizer {};
+    }
+    pub fn tokenize_quote_string(&self, input: &mut Peekable<Chars<'_>>) -> Token {
         let mut value = Vec::<char>::new();
         while let Some(character) = input.next() {
             if character == '"' {
@@ -34,7 +42,10 @@ impl Token {
         }
         return Token::new(TokenKind::QuoteString, String::from_iter(value));
     }
-    pub fn tokenize_nonquote_string(input: &mut Peekable<Chars<'_>>) -> Result<Token, String> {
+    pub fn tokenize_nonquote_string(
+        &self,
+        input: &mut Peekable<Chars<'_>>,
+    ) -> Result<Token, String> {
         let mut value = Vec::<char>::new();
         while let Some(character) = input.peek() {
             if character.is_alphanumeric() || ['-', '_', ':'].contains(character) {

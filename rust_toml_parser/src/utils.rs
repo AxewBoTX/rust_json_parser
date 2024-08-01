@@ -1,6 +1,6 @@
-use crate::token;
-
-pub fn refine_tokens(_input: Vec<token::Token>) -> Result<Vec<token::Token>, String> {
-    let tokens: Vec<token::Token> = Vec::new();
-    return Ok(tokens);
+pub fn is_integer(input: String) -> bool {
+    return input.parse::<i64>().is_ok();
+}
+pub fn is_float(input: String) -> bool {
+    return input.parse::<f64>().is_ok();
 }
