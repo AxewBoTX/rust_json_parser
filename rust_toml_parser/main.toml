@@ -1,7 +1,7 @@
 [main]
 name = "axewbotx"
-age = [1,2,3]
-power = {name = "some_stuf"}
-
-[main.super_power]
-name = "some_more_stuff"
+# age = [1,2,3]
+# power = {name = "some_stuf"}
+#
+# [main.super_power]
+# name = "some_more_stuff"

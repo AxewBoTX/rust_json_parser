@@ -3,6 +3,8 @@ pub mod refiner;
 pub mod tokenizer;
 pub mod utils;
 
+use utils::TomlIterator;
+
 #[derive(Debug)]
 pub struct TomlParser {}
 
@@ -12,14 +14,17 @@ impl TomlParser {
     }
     pub fn tokenize(&self, input: String) -> Result<Vec<tokenizer::Token>, String> {
         let mut tokens: Vec<tokenizer::Token> = Vec::new();
-        let mut input = input.chars().peekable();
-        let toml_tokenizer = tokenizer::Tokenizer::new();
+        let mut toml_tokenizer = tokenizer::Tokenizer::new(&input.chars().collect::<Vec<char>>());
 
-        while let Some(character) = input.peek() {
+        while let Some(character) = toml_tokenizer.peek() {
             match character {
                 '#' => {
-                    while Some('\n') != input.peek().copied() {
-                        input.next();
+                    // ----- this implementation can be improved ----
+                    while Some('\n') != toml_tokenizer.peek() {
+                        toml_tokenizer.next();
+                    }
+                    if Some('\n') == toml_tokenizer.peek() {
+                        toml_tokenizer.next();
                     }
                 }
                 '{' => {
@@ -27,69 +32,69 @@ impl TomlParser {
                         tokenizer::TokenKind::CurlyBracketOpen,
                         "{".to_string(),
                     ));
-                    input.next();
+                    toml_tokenizer.next();
                 }
                 '}' => {
                     tokens.push(tokenizer::Token::new(
                         tokenizer::TokenKind::CurlyBracketOpen,
                         "}".to_string(),
                     ));
-                    input.next();
+                    toml_tokenizer.next();
                 }
                 '[' => {
                     tokens.push(tokenizer::Token::new(
                         tokenizer::TokenKind::BracketOpen,
                         "[".to_string(),
                     ));
-                    input.next();
+                    toml_tokenizer.next();
                 }
                 ']' => {
                     tokens.push(tokenizer::Token::new(
                         tokenizer::TokenKind::BracketClose,
                         "]".to_string(),
                     ));
-                    input.next();
+                    toml_tokenizer.next();
                 }
                 ',' => {
                     tokens.push(tokenizer::Token::new(
                         tokenizer::TokenKind::Comma,
                         ",".to_string(),
                     ));
-                    input.next();
+                    toml_tokenizer.next();
                 }
                 '.' => {
                     tokens.push(tokenizer::Token::new(
                         tokenizer::TokenKind::Dot,
                         ".".to_string(),
                     ));
-                    input.next();
+                    toml_tokenizer.next();
                 }
                 '=' => {
                     tokens.push(tokenizer::Token::new(
                         tokenizer::TokenKind::EqualTo,
                         "=".to_string(),
                     ));
-                    input.next();
+                    toml_tokenizer.next();
                 }
                 '"' => {
-                    input.next();
-                    tokens.push(toml_tokenizer.tokenize_quote_string(&mut input));
+                    toml_tokenizer.next();
+                    tokens.push(toml_tokenizer.tokenize_quote_string());
                 }
                 '\n' => {
                     tokens.push(tokenizer::Token::new(
                         tokenizer::TokenKind::NewLine,
                         "\n".to_string(),
                     ));
-                    input.next();
+                    toml_tokenizer.next();
                 }
                 '\0' => {
                     break;
                 }
                 other => {
                     if other.is_whitespace() {
-                        input.next();
-                    } else if other.is_alphanumeric() || ['_', '-'].contains(other) {
-                        match toml_tokenizer.tokenize_nonquote_string(&mut input) {
+                        toml_tokenizer.next();
+                    } else if other.is_alphanumeric() || ['_', '-'].contains(&other) {
+                        match toml_tokenizer.tokenize_nonquote_string() {
                             Ok(safe_value) => {
                                 tokens.push(safe_value);
                             }
