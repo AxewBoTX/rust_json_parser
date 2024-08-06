@@ -48,6 +48,9 @@ impl ASTBuilder {
                 tokenizer::TokenKind::NewLine => {
                     // is_key = false;
                 }
+                tokenizer::TokenKind::Boolean => {}
+                tokenizer::TokenKind::Integer => {}
+                tokenizer::TokenKind::Float => {}
             }
         }
         return table;
@@ -67,6 +70,9 @@ impl ASTBuilder {
                 tokenizer::TokenKind::QuoteString => {}
                 tokenizer::TokenKind::NonQuoteString => {}
                 tokenizer::TokenKind::NewLine => {}
+                tokenizer::TokenKind::Boolean => {}
+                tokenizer::TokenKind::Integer => {}
+                tokenizer::TokenKind::Float => {}
             }
         }
         return array;

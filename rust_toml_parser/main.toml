@@ -4,8 +4,5 @@ false = true
 true = false
 12.12 = false
 13.13 = 13.13
-# age = [1,2,3]
-# power = {name = "some_stuf"}
-#
-# [main.super_power]
-# name = "some_more_stuff"
+age = [1,2,3]
+power = {name = "some_stuf"}

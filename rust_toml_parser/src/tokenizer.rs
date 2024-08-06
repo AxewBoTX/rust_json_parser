@@ -11,6 +11,9 @@ pub enum TokenKind {
     Comma,
     QuoteString,
     NonQuoteString,
+    Boolean,
+    Integer,
+    Float,
     NewLine,
 }
 
