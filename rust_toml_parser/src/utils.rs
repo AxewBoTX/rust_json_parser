@@ -62,9 +62,9 @@ where
     }
 }
 
-pub fn is_integer(input: String) -> bool {
+pub fn is_integer(input: &str) -> bool {
     return input.parse::<i64>().is_ok();
 }
-pub fn is_float(input: String) -> bool {
+pub fn is_float(input: &str) -> bool {
     return input.parse::<f64>().is_ok();
 }

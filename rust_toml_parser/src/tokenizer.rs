@@ -60,7 +60,12 @@ impl Tokenizer {
             ]
             .contains(&character)
             {
-                return Err(format!("Unexpected character: {:#?}", character));
+                if self.list.peek_after(1).is_some_and(|next_char| next_char == '}'){
+                    return Err(format!("Unexpected shit: {:#?}", character));
+                }else{
+
+                    break;
+                }
             } else {
                 break;
             }

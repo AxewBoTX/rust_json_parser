@@ -12,7 +12,14 @@ impl TomlParser {
     }
     pub fn tokenize(&self, input: String) -> Result<Vec<tokenizer::Token>, String> {
         let mut tokens: Vec<tokenizer::Token> = Vec::new();
-        let mut toml_tokenizer = tokenizer::Tokenizer::new(&input.chars().collect::<Vec<char>>());
+        let tokenizer_input = input.chars().collect::<Vec<char>>();
+        match tokenizer_input.len() {
+            0 => {
+                return Err("empty input file".to_string());
+            }
+            _ => {}
+        }
+        let mut toml_tokenizer = tokenizer::Tokenizer::new(&tokenizer_input);
 
         while let Some(character) = toml_tokenizer.list.peek() {
             match character {
@@ -33,7 +40,7 @@ impl TomlParser {
                 }
                 '}' => {
                     tokens.push(tokenizer::Token::new(
-                        tokenizer::TokenKind::CurlyBracketOpen,
+                        tokenizer::TokenKind::CurlyBracketClose,
                         "}".to_string(),
                     ));
                     toml_tokenizer.list.current();
@@ -108,6 +115,12 @@ impl TomlParser {
         return Ok(tokens);
     }
     pub fn parse(&self, input: Vec<tokenizer::Token>) -> Result<ast_builder::ASTNode, String> {
+        match input.len() {
+            0 => {
+                return Err("no syntax tokens detected".to_string());
+            }
+            _ => {}
+        }
         let mut toml_refiner = refiner::Refiner::new(&input);
         match toml_refiner.refine_tokens() {
             Ok(safe_value) => {
