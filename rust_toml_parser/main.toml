@@ -1,11 +1,12 @@
 [main]
 name = "axewbotx"
+shit = [false,true,false]
 false = true
-# true = false
-# 12.12.12.12.12.12 = false
-# 13.13 = 13.13
-# age = [1,2,3]
-# power = {name = 12.12,age = 12.13}
+true = false
+12.12.12.12.12.12 = false
+13.13 = 13.13
+age = [{shit = 12.13, name = 13},2,3]
+power = {name = 12.12,age = 12.13,14.14 = 12.12}
 
 [12.13.13]
 name = "user"
