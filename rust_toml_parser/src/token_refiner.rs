@@ -1,12 +1,12 @@
 use crate::{tokenizer, utils};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub struct Refiner {
+pub struct TokenRefiner {
     pub list: utils::IteratorList<tokenizer::Token>,
 }
-impl Refiner {
-    pub fn new(list: &Vec<tokenizer::Token>) -> Refiner {
-        return Refiner {
+impl TokenRefiner {
+    pub fn new(list: &Vec<tokenizer::Token>) -> TokenRefiner {
+        return TokenRefiner {
             list: utils::IteratorList::new(list),
         };
     }
@@ -28,7 +28,7 @@ impl Refiner {
                     // non-quote string
                     tokenizer::TokenKind::NonQuoteString => match self.refine_non_quote_string() {
                         Ok(safe_value) => {
-                            tokens.push(safe_value);
+                            tokens.extend(safe_value);
                         }
                         Err(e) => {
                             return Err(e.to_string());
@@ -66,39 +66,67 @@ impl Refiner {
         return Ok(tokens);
     }
     // refine `NonQuoteString` tokens
-    fn refine_non_quote_string(&mut self) -> Result<tokenizer::Token, String> {
+    fn refine_non_quote_string(&mut self) -> Result<Vec<tokenizer::Token>, String> {
         match self.list.peek() {
             Some(current_token) => {
-                // value in a key-value pair
-                if [String::from("true"), String::from("false")].contains(&current_token.value) {
-                    // boolean
-                    match self.list.current() {
-                        Some(_) => {}
-                        None => {
-                            return Err("something went terribly wrong! (most probably a language problem, not a code problem)".to_string());
+                // inside an inline object
+                if self.list.peek_before(1).is_some_and(|prev_token| {
+                    prev_token.kind == tokenizer::TokenKind::CurlyBracketOpen
+                }) {
+                    let mut tokens: Vec<tokenizer::Token> = Vec::new();
+                    while let Some(token) = self.list.peek() {
+                        match token.kind {
+                            tokenizer::TokenKind::EqualTo => {
+                                match self.list.current() {
+                                    Some(safe_value) => tokens.push(safe_value),
+                                    None => {
+                                        return Err("something went terribly wrong! (most probably a language problem, not a code problem)".to_string());
+                                    }
+                                }
+                                break;
+                            }
+                            _ => match self.list.current() {
+                                Some(safe_value) => tokens.push(safe_value),
+                                None => {
+                                    return Err("something went terribly wrong! (most probably a language problem, not a code problem)".to_string());
+                                }
+                            },
                         }
                     }
-                    return Ok(tokenizer::Token::new(
-                        tokenizer::TokenKind::Boolean,
-                        current_token.value.clone(),
-                    ));
-                } else if utils::is_integer(&current_token.value) {
-                    match self.refine_number() {
-                        Ok(safe_value) => {
-                            return Ok(safe_value);
-                        }
-                        Err(e) => {
-                            return Err(e.to_string());
-                        }
-                    }
+                    return Ok(tokens);
                 } else {
-                    match self.list.current() {
-                        Some(_) => {}
-                        None => {
-                            return Err("something went terribly wrong! (most probably a language problem, not a code problem)".to_string());
+                    // value in a key-value pair
+                    if [String::from("true"), String::from("false")].contains(&current_token.value)
+                    {
+                        // boolean
+                        match self.list.current() {
+                            Some(_) => {}
+                            None => {
+                                return Err("something went terribly wrong! (most probably a language problem, not a code problem)".to_string());
+                            }
                         }
+                        return Ok(vec![tokenizer::Token::new(
+                            tokenizer::TokenKind::Boolean,
+                            current_token.value.clone(),
+                        )]);
+                    } else if utils::is_integer(&current_token.value) {
+                        match self.refine_number() {
+                            Ok(safe_value) => {
+                                return Ok(vec![safe_value]);
+                            }
+                            Err(e) => {
+                                return Err(e.to_string());
+                            }
+                        }
+                    } else {
+                        match self.list.current() {
+                            Some(_) => {}
+                            None => {
+                                return Err("something went terribly wrong! (most probably a language problem, not a code problem)".to_string());
+                            }
+                        }
+                        return Ok(vec![current_token.clone()]);
                     }
-                    return Ok(current_token.clone());
                 }
             }
             None => {
@@ -120,7 +148,7 @@ impl Refiner {
                 // non-quote string
                 tokenizer::TokenKind::NonQuoteString => match self.refine_non_quote_string() {
                     Ok(safe_value) => {
-                        tokens.push(safe_value);
+                        tokens.extend(safe_value);
                     }
                     Err(e) => {
                         return Err(e.to_string());

@@ -1,5 +1,5 @@
-use crate::tokenizer;
-use std::{collections::HashMap, iter::Peekable, slice::Iter};
+use crate::{tokenizer, utils};
+use std::collections::HashMap;
 
 #[derive(Debug)]
 pub enum ASTNode {
@@ -11,21 +11,26 @@ pub enum ASTNode {
     String(String),
 }
 
-#[derive(Debug)]
-pub struct ASTBuilder {}
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct ASTBuilder {
+    pub list: utils::IteratorList<tokenizer::Token>,
+}
 impl ASTBuilder {
-    pub fn new() -> ASTBuilder {
-        ASTBuilder {}
+    pub fn new(list: &Vec<tokenizer::Token>) -> ASTBuilder {
+        return ASTBuilder {
+            list: utils::IteratorList::new(list),
+        };
     }
-    pub fn parse_table(
-        &self,
-        tokens: &mut Peekable<Iter<tokenizer::Token>>,
-    ) -> HashMap<String, ASTNode> {
+    pub fn parse(&mut self) -> HashMap<String, ASTNode> {
+        let main_table: HashMap<String, ASTNode> = HashMap::new();
+        return main_table;
+    }
+    pub fn parse_table(&mut self) -> HashMap<String, ASTNode> {
         let table: HashMap<String, ASTNode> = HashMap::new();
         // let mut is_key = true;
         // let mut current_key: Option<&str> = None;
 
-        while let Some(curr_token) = tokens.next() {
+        while let Some(curr_token) = self.list.current() {
             match curr_token.kind {
                 tokenizer::TokenKind::CurlyBracketOpen => {}
                 tokenizer::TokenKind::CurlyBracketClose => {}
@@ -56,9 +61,9 @@ impl ASTBuilder {
         return table;
     }
 
-    pub fn parse_array(&self, tokens: &mut Peekable<Iter<tokenizer::Token>>) -> Vec<ASTNode> {
+    pub fn parse_array(&mut self) -> Vec<ASTNode> {
         let array: Vec<ASTNode> = Vec::new();
-        while let Some(curr_token) = tokens.next() {
+        while let Some(curr_token) = self.list.current() {
             match curr_token.kind {
                 tokenizer::TokenKind::CurlyBracketOpen => {}
                 tokenizer::TokenKind::CurlyBracketClose => {}

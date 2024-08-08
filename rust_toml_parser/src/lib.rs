@@ -1,5 +1,5 @@
 pub mod ast_builder;
-pub mod refiner;
+pub mod token_refiner;
 pub mod tokenizer;
 pub mod utils;
 
@@ -121,15 +121,12 @@ impl TomlParser {
             }
             _ => {}
         }
-        let mut toml_refiner = refiner::Refiner::new(&input);
-        match toml_refiner.refine_tokens() {
+        let mut toml_token_refiner = token_refiner::TokenRefiner::new(&input);
+        match toml_token_refiner.refine_tokens() {
             Ok(safe_value) => {
                 println!("{:#?}", safe_value);
-                let mut tokens = safe_value.iter().peekable();
-                let toml_ast_builder = ast_builder::ASTBuilder::new();
-                return Ok(ast_builder::ASTNode::Table(
-                    toml_ast_builder.parse_table(&mut tokens),
-                ));
+                let mut toml_ast_builder = ast_builder::ASTBuilder::new(&safe_value);
+                return Ok(ast_builder::ASTNode::Table(toml_ast_builder.parse()));
             }
             Err(e) => {
                 return Err(e.to_string());
