@@ -124,9 +124,15 @@ impl TomlParser {
         let mut toml_token_refiner = token_refiner::TokenRefiner::new(&input);
         match toml_token_refiner.refine_tokens() {
             Ok(safe_value) => {
-                println!("{:#?}", safe_value);
                 let mut toml_ast_builder = ast_builder::ASTBuilder::new(&safe_value);
-                return Ok(ast_builder::ASTNode::Table(toml_ast_builder.parse()));
+                match toml_ast_builder.parse() {
+                    Ok(safe_value) => {
+                        return Ok(ast_builder::ASTNode::Table(safe_value));
+                    }
+                    Err(e) => {
+                        return Err(e.to_string());
+                    }
+                }
             }
             Err(e) => {
                 return Err(e.to_string());
