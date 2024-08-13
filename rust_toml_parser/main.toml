@@ -1,13 +1,14 @@
 age = false
+power = {name = 12.12,age = 12.13,helo = 12.12}
 # love = "axewbotx"
 # now = 12.12
 # wow = "12.12"
 # shit = 21
 # wow = [[1,2],["shit","hello"]]
 # stuff = [1,false,"Shit","Wow",5.12312]
-["hello"."wow"]
-name = "axewbotx"
-shit = [false,true,false]
+# ["hello"]
+# name = "axewbotx"
+# shit = [false,true,false]
 # false = true
 # true = false
 # 12.12.12.12.12.12 = false
