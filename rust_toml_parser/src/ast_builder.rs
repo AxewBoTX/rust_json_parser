@@ -32,14 +32,7 @@ impl ASTBuilder {
             match token.kind {
                 tokenizer::TokenKind::CurlyBracketOpen => {
                     if let Some(key) = &current_key {
-                        match self.parse_table() {
-                            Ok(safe_value) => {
-                                main_table.insert(key.to_string(), ASTNode::Table(safe_value));
-                            }
-                            Err(e) => {
-                                return Err(e.to_string());
-                            }
-                        }
+                        main_table.insert(key.to_string(), ASTNode::Table(self.parse_table()?));
                     }
                 }
                 tokenizer::TokenKind::CurlyBracketClose => {}
@@ -52,31 +45,19 @@ impl ASTBuilder {
                                 | tokenizer::TokenKind::NonQuoteString => {
                                     table_heading = Some(curr_token.value.clone());
                                 }
-                                tokenizer::TokenKind::BracketClose => match self.parse_table() {
-                                    Ok(safe_value) => {
-                                        if let Some(heading) = &table_heading {
-                                            main_table.insert(
-                                                heading.to_string(),
-                                                ASTNode::Table(safe_value),
-                                            );
-                                        }
+                                tokenizer::TokenKind::BracketClose => {
+                                    if let Some(heading) = &table_heading {
+                                        main_table.insert(
+                                            heading.to_string(),
+                                            ASTNode::Table(self.parse_table()?),
+                                        );
                                     }
-                                    Err(e) => {
-                                        return Err(e.to_string());
-                                    }
-                                },
+                                }
                                 _ => {}
                             }
                         }
                     } else if let Some(key) = &current_key {
-                        match self.parse_array() {
-                            Ok(safe_value) => {
-                                main_table.insert(key.to_string(), ASTNode::Array(safe_value));
-                            }
-                            Err(e) => {
-                                return Err(e.to_string());
-                            }
-                        }
+                        main_table.insert(key.to_string(), ASTNode::Array(self.parse_array()?));
                     }
                 }
                 tokenizer::TokenKind::BracketClose => {}
@@ -148,21 +129,13 @@ impl ASTBuilder {
         let mut array: Vec<ASTNode> = Vec::new();
         while let Some(token) = self.list.current() {
             match token.kind {
-                tokenizer::TokenKind::CurlyBracketOpen => match self.parse_table() {
-                    Ok(safe_value) => array.push(ASTNode::Table(safe_value)),
-                    Err(e) => {
-                        return Err(e.to_string());
-                    }
-                },
+                tokenizer::TokenKind::CurlyBracketOpen => {
+                    array.push(ASTNode::Table(self.parse_table()?))
+                }
                 tokenizer::TokenKind::CurlyBracketClose => {}
-                tokenizer::TokenKind::BracketOpen => match self.parse_array() {
-                    Ok(safe_value) => {
-                        array.push(ASTNode::Array(safe_value));
-                    }
-                    Err(e) => {
-                        return Err(e.to_string());
-                    }
-                },
+                tokenizer::TokenKind::BracketOpen => {
+                    array.push(ASTNode::Array(self.parse_array()?));
+                }
                 tokenizer::TokenKind::BracketClose => {
                     break;
                 }
@@ -215,14 +188,7 @@ impl ASTBuilder {
             match token.kind {
                 tokenizer::TokenKind::CurlyBracketOpen => {
                     if let Some(key) = &current_key {
-                        match self.parse_table() {
-                            Ok(safe_value) => {
-                                table.insert(key.to_string(), ASTNode::Table(safe_value));
-                            }
-                            Err(e) => {
-                                return Err(e.to_string());
-                            }
-                        }
+                        table.insert(key.to_string(), ASTNode::Table(self.parse_table()?));
                     }
                 }
                 tokenizer::TokenKind::CurlyBracketClose => {
@@ -231,14 +197,7 @@ impl ASTBuilder {
                 tokenizer::TokenKind::BracketOpen => {
                     if is_key == true {
                     } else if let Some(key) = &current_key {
-                        match self.parse_array() {
-                            Ok(safe_value) => {
-                                table.insert(key.to_string(), ASTNode::Array(safe_value));
-                            }
-                            Err(e) => {
-                                return Err(e.to_string());
-                            }
-                        }
+                        table.insert(key.to_string(), ASTNode::Array(self.parse_array()?));
                     }
                 }
                 tokenizer::TokenKind::BracketClose => {}

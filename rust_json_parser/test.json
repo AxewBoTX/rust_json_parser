@@ -2,6 +2,10 @@
   "id": "tower",
   "index": 0.02,
   "something": [1.2, 2.1238, 3.817239817, 4.07012701337],
+  "user": {
+    "name": "some_name",
+    "age": 12.324343
+  },
   "nullValue": null,
   "boolean": true
 }

@@ -21,14 +21,7 @@ pub fn parse_object(tokens: &mut Iter<token::Token>) -> Result<HashMap<String, N
         match curr_token.kind {
             token::TokenKind::CurlyBraceOpen => {
                 if let Some(key) = current_key {
-                    match parse_object(tokens) {
-                        Ok(safe_value) => {
-                            object.insert(key.to_string(), Node::Object(safe_value));
-                        }
-                        Err(e) => {
-                            return Err(e.to_string());
-                        }
-                    }
+                    object.insert(key.to_string(), Node::Object(parse_object(tokens)?));
                 }
             }
             token::TokenKind::Colon => {
@@ -36,14 +29,7 @@ pub fn parse_object(tokens: &mut Iter<token::Token>) -> Result<HashMap<String, N
             }
             token::TokenKind::BracketOpen => {
                 if let Some(key) = current_key {
-                    match parse_array(tokens) {
-                        Ok(safe_value) => {
-                            object.insert(key.to_string(), Node::Array(safe_value));
-                        }
-                        Err(e) => {
-                            return Err(e.to_string());
-                        }
-                    }
+                    object.insert(key.to_string(), Node::Array(parse_array(tokens)?));
                     current_key = None;
                 }
             }
@@ -103,22 +89,12 @@ pub fn parse_array(tokens: &mut Iter<token::Token>) -> Result<Vec<Node>, String>
     let mut array: Vec<Node> = Vec::<Node>::new();
     while let Some(curr_token) = tokens.next() {
         match curr_token.kind {
-            token::TokenKind::CurlyBraceOpen => match parse_object(tokens) {
-                Ok(safe_value) => {
-                    array.push(Node::Object(safe_value));
-                }
-                Err(e) => {
-                    return Err(e.to_string());
-                }
-            },
-            token::TokenKind::BracketOpen => match parse_array(tokens) {
-                Ok(safe_value) => {
-                    array.push(Node::Array(safe_value));
-                }
-                Err(e) => {
-                    return Err(e.to_string());
-                }
-            },
+            token::TokenKind::CurlyBraceOpen => {
+                array.push(Node::Object(parse_object(tokens)?));
+            }
+            token::TokenKind::BracketOpen => {
+                array.push(Node::Array(parse_array(tokens)?));
+            }
             token::TokenKind::String => {
                 array.push(Node::String(curr_token.value.clone()));
             }

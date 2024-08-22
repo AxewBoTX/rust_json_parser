@@ -55,14 +55,7 @@ impl JsonParser {
                     input.next();
                     tokens.push(token::Token::tokenize_string(&mut input));
                 }
-                '-' | '0'..='9' => match token::Token::tokenize_number(&mut input) {
-                    Ok(safe_value) => {
-                        tokens.push(safe_value);
-                    }
-                    Err(e) => {
-                        return Err(e.to_string());
-                    }
-                },
+                '-' | '0'..='9' => tokens.push(token::Token::tokenize_number(&mut input)?),
                 't' => {
                     tokens.push(token::Token::tokenize_true(&mut input));
                 }
@@ -88,12 +81,7 @@ impl JsonParser {
     }
 
     pub fn parse(&self, input: String) -> Result<node::Node, String> {
-        let tokens = match self.tokenize(input) {
-            Ok(safe_value) => safe_value,
-            Err(e) => {
-                return Err(e.to_string());
-            }
-        };
+        let tokens = self.tokenize(input)?;
         let mut tokens = tokens.iter();
 
         let mut value = node::Node::Null;
@@ -101,20 +89,10 @@ impl JsonParser {
         while let Some(token) = tokens.next() {
             match token.kind {
                 token::TokenKind::CurlyBraceOpen => {
-                    value = node::Node::Object(match node::parse_object(&mut tokens) {
-                        Ok(safe_value) => safe_value,
-                        Err(e) => {
-                            return Err(e.to_string());
-                        }
-                    });
+                    value = node::Node::Object(node::parse_object(&mut tokens)?);
                 }
                 token::TokenKind::BracketOpen => {
-                    value = node::Node::Array(match node::parse_array(&mut tokens) {
-                        Ok(safe_value) => safe_value,
-                        Err(e) => {
-                            return Err(e.to_string());
-                        }
-                    });
+                    value = node::Node::Array(node::parse_array(&mut tokens)?);
                 }
                 token::TokenKind::String => {
                     value = node::Node::String(token.value.clone());

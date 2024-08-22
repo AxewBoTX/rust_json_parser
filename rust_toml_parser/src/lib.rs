@@ -98,14 +98,7 @@ impl TomlParser {
                     if other.is_whitespace() {
                         toml_tokenizer.list.current();
                     } else if other.is_alphanumeric() || ['_', '-'].contains(&other) {
-                        match toml_tokenizer.tokenize_nonquote_string() {
-                            Ok(safe_value) => {
-                                tokens.push(safe_value);
-                            }
-                            Err(e) => {
-                                return Err(e.to_string());
-                            }
-                        }
+                        tokens.push(toml_tokenizer.tokenize_nonquote_string()?);
                     } else {
                         return Err(format!("Unexpected character: {:#?}", other));
                     }
@@ -122,21 +115,9 @@ impl TomlParser {
             _ => {}
         }
         let mut toml_token_refiner = token_refiner::TokenRefiner::new(&input);
-        match toml_token_refiner.refine_tokens() {
-            Ok(safe_value) => {
-                let mut toml_ast_builder = ast_builder::ASTBuilder::new(&safe_value);
-                match toml_ast_builder.parse() {
-                    Ok(safe_value) => {
-                        return Ok(ast_builder::ASTNode::Table(safe_value));
-                    }
-                    Err(e) => {
-                        return Err(e.to_string());
-                    }
-                }
-            }
-            Err(e) => {
-                return Err(e.to_string());
-            }
-        }
+        let refined_tokens = toml_token_refiner.refine_tokens()?;
+        let mut toml_ast_builder = ast_builder::ASTBuilder::new(&refined_tokens);
+        let main_table = toml_ast_builder.parse()?;
+        return Ok(ast_builder::ASTNode::Table(main_table));
     }
 }

@@ -26,23 +26,12 @@ impl TokenRefiner {
             {
                 match current_token.kind {
                     // non-quote string
-                    tokenizer::TokenKind::NonQuoteString => match self.refine_non_quote_string() {
-                        Ok(safe_value) => {
-                            tokens.extend(safe_value);
-                        }
-                        Err(e) => {
-                            return Err(e.to_string());
-                        }
-                    },
+                    tokenizer::TokenKind::NonQuoteString => {
+                        tokens.extend(self.refine_non_quote_string()?)
+                    }
+
                     // array
-                    tokenizer::TokenKind::BracketOpen => match self.refine_array() {
-                        Ok(safe_value) => {
-                            tokens.extend(safe_value);
-                        }
-                        Err(e) => {
-                            return Err(e.to_string());
-                        }
-                    },
+                    tokenizer::TokenKind::BracketOpen => tokens.extend(self.refine_array()?),
                     _ => {
                         tokens.push(current_token.clone());
                         match self.list.current() {
@@ -110,14 +99,7 @@ impl TokenRefiner {
                             current_token.value.clone(),
                         )]);
                     } else if utils::is_integer(&current_token.value) {
-                        match self.refine_number() {
-                            Ok(safe_value) => {
-                                return Ok(vec![safe_value]);
-                            }
-                            Err(e) => {
-                                return Err(e.to_string());
-                            }
-                        }
+                        return Ok(vec![self.refine_number()?]);
                     } else {
                         match self.list.current() {
                             Some(_) => {}
@@ -146,23 +128,11 @@ impl TokenRefiner {
         while let Some(current_token) = self.list.peek() {
             match current_token.kind {
                 // non-quote string
-                tokenizer::TokenKind::NonQuoteString => match self.refine_non_quote_string() {
-                    Ok(safe_value) => {
-                        tokens.extend(safe_value);
-                    }
-                    Err(e) => {
-                        return Err(e.to_string());
-                    }
-                },
+                tokenizer::TokenKind::NonQuoteString => {
+                    tokens.extend(self.refine_non_quote_string()?)
+                }
                 // array
-                tokenizer::TokenKind::BracketOpen => match self.refine_array() {
-                    Ok(safe_value) => {
-                        tokens.extend(safe_value);
-                    }
-                    Err(e) => {
-                        return Err(e.to_string());
-                    }
-                },
+                tokenizer::TokenKind::BracketOpen => tokens.extend(self.refine_array()?),
                 tokenizer::TokenKind::BracketClose => {
                     tokens.push(current_token.clone());
                     match self.list.current() {
